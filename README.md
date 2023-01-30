@@ -1,7 +1,7 @@
 # Neural-Networks-Library
 A python library for making simple neural networks built with numpy
 
-## Example of forward propagation:
+## Example of forward propogation:
 ```python
 from nnl import layers
 import numpy as np
