@@ -1,8 +1,3 @@
-# Neural-Networks-Library
-A python library for making simple neural networks built with numpy
-
-## Example of forward propagation:
-```python
 from nnl import layers
 import numpy as np
 
@@ -18,4 +13,3 @@ layer1.forward(inputs=inputs)
 layer2.forward(inputs=layer1.output)
 
 print(layer2.output)
-```
