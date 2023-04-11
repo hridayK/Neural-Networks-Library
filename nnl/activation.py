@@ -25,6 +25,16 @@ class softmax:
         probabilities = exp_values / np.sum(exp_values, axis=1, keepdims=True)
         self.output = probabilities
 
+    def backward(self, dvalues):
+        self.dinputs = np.empty_like(dvalues)
+        for index, (single_output, single_dvalues) in \
+            enumerate(zip(self.output, dvalues)):
+            single_output = single_output.reshape(-1,1)
+            jacobian_matrix = np.diagflat(single_output) - \
+            np.dot(single_output,single_output.T)
+            self.dinputs[index] = np.dot(jacobian_matrix, single_dvalues)
+
+
 class relu:
     """
     ReLu: Rectied Linear Activation Unit\n
@@ -36,6 +46,10 @@ class relu:
         ```self.output``` gets values that are output of the ReLu function.
         """
         self.output = np.maximum(0,inputs)
+
+    def backward(self, dvalues):
+        self.dinputs = dvalues.copy()
+        self.dinputs[self.inputs <= 0] = 0
 
 class elu:
     """
