@@ -11,7 +11,7 @@ class AdamOptimizer:
         self.t = 0
     
     def optimize(self, gradient):
-        if self.m is None:
+        if self.m is None or self.m.shape != gradient.shape:
             self.m = np.zeros(gradient.shape)
             self.v = np.zeros(gradient.shape)
         

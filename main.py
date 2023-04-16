@@ -30,6 +30,18 @@ layer1.backward(activation1.dinputs)
 print("weights shape after backward: ", layer1.dweights.shape)
 print("bias shape after backward: ", layer1.dbiases.shape)
 
+layer1.dweights = layer1.dweights.T
+layer1.dbiases = layer1.dbiases.T
+layer2.dweights = layer2.dweights.T
+layer2.dbiases = layer2.dbiases.T
+
+print("weights shape after transpose: ", layer1.dweights.shape)
+print("bias shape after transpose: ", layer1.dbiases.shape)
+print("weights shape after transpose: ", layer2.dweights.shape)
+print("bias shape after transpose: ", layer2.dbiases.shape)
+
+
+
 print(f"\nlayer 1:\n\ndweights = {layer1.dweights}\n\ndbiases = {layer1.dbiases}\n")
 print(f"\nlayer 2:\n\ndweights = {layer2.dweights}\n\ndbiases = {layer2.dbiases}")
 
