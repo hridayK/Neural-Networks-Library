@@ -60,6 +60,9 @@ class softmax:
         self.output = probabilities
 
     def backward(self, dvalues):
+        """
+        Calculate the derivative of the loss with respect to the inputs.
+        """
         self.dinputs = np.empty_like(dvalues)
         for index, (single_output, single_dvalues) in \
             enumerate(zip(self.output, dvalues)):
@@ -83,6 +86,9 @@ class relu:
         self.output = np.maximum(0,inputs)
 
     def backward(self, dvalues):
+        """
+        Calculate the derivative of the loss with respect to the inputs.
+        """
         self.dinputs = dvalues.copy()
         self.dinputs[self.inputs <= 0] = 0
 
@@ -102,6 +108,12 @@ class elu:
         ```self.output``` gets values that are output of the ELU function.
         """
         self.output = np.where(input>0, inputs, alpha*(np.exp(inputs) - 1))
+    def backward(self, dvalues):
+        """
+        Calculate the derivative of the loss with respect to the inputs.
+        """
+        self.dinputs = dvalues.copy()
+        self.dinputs[self.inputs <= 0] *= self.alpha * np.exp(self.inputs[self.inputs <= 0])
 
 class sigmoid:
     """
@@ -115,6 +127,11 @@ class sigmoid:
         ``self.output`` gets values that are output of the Sigmoid function.
         """
         self.output = 1 / (1 + np.exp(-1*inputs))
+    def backward(self, dvalues):
+        """
+        Calculate the derivative of the loss with respect to the inputs.
+        """
+        self.dinputs = dvalues * (self.output * (1 - self.output))
 
 class Loss:
     def calculate(self, output, y):
