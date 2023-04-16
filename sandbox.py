@@ -4,38 +4,19 @@ from nnfs.datasets import spiral_data
 
 nnfs.init()
 
+
+
 # Dense layer
-class layer_dense:
+class Layer_Dense:
 
     # Layer initialization
     def __init__(self, n_inputs, n_neurons):
-
-        """
-        A class for making Dense layers
-        
-        Attributes:
-        -----------
-        n_inputs : int
-            The number of inputs in each batch
-        n_neruons : int
-            The number of neurons in the Dense layer
-        Methods:
-        ----------
-        forward(input = np.ndarray or a list)
-            Accepts numpy array or a list as input to
-            forward propagate and store the new value in
-            self.output.
-        """
-
         # Initialize weights and biases
         self.weights = 0.01 * np.random.randn(n_inputs, n_neurons)
         self.biases = np.zeros((1, n_neurons))
 
     # Forward pass
     def forward(self, inputs):
-        """
-        Forward propagates input and stores it in ```self.output```
-        """
         # Remember input values
         self.inputs = inputs
         # Calculate output values from inputs, weights and biases
@@ -43,9 +24,6 @@ class layer_dense:
 
     # Backward pass
     def backward(self, dvalues):
-        """
-        Forward propagates input and stores it in ```self.output```
-        """
         # Gradients on parameters
         self.dweights = np.dot(self.inputs.T, dvalues)
         self.dbiases = np.sum(dvalues, axis=0, keepdims=True)
@@ -54,18 +32,10 @@ class layer_dense:
 
 
 # ReLU activation
-class relu:
-    """
-    ReLu: Rectied Linear Activation Unit\n
-    Applies ReLu function giving the output as:
-        ```max(0,inputs)```
-    """
-    
+class Activation_ReLU:
+
     # Forward pass
     def forward(self, inputs):
-        """
-        ```self.output``` gets values that are output of the ReLu function.
-        """
         # Remember input values
         self.inputs = inputs
         # Calculate output values from inputs
@@ -73,10 +43,6 @@ class relu:
 
     # Backward pass
     def backward(self, dvalues):
-        """
-        Calculate the derivative of the loss with respect to the inputs.
-        """
-
         # Since we need to modify original variable,
         # let's make a copy of values first
         self.dinputs = dvalues.copy()
@@ -87,18 +53,10 @@ class relu:
 
 
 # Softmax activation
-class softmax:
-    """
-    Softmax functions: converts a vector into probability distribution as output:\n
-    ``self.output = e^zi / Σ (e^z)``\n
-    where:
-    zi = element of a batch z at index i
-    """
+class Activation_Softmax:
+
     # Forward pass
     def forward(self, inputs):
-        """
-        ```self.output``` gets values that are output of the Softmax function.
-        """
         # Remember input values
         self.inputs = inputs
 
@@ -113,9 +71,6 @@ class softmax:
 
     # Backward pass
     def backward(self, dvalues):
-        """
-        Calculate the derivative of the loss with respect to the inputs.
-        """
 
         # Create uninitialized array
         self.dinputs = np.empty_like(dvalues)
@@ -133,50 +88,9 @@ class softmax:
             self.dinputs[index] = np.dot(jacobian_matrix,
                                          single_dvalues)
 
-class elu:
-    """
-    ELU: Exponential Linear Unit
-    It is a modified form of ReLu function giving output as:
-    ```
-    def elu(x):
-        output = x if x > 0
-        output = α * (e^x - 1) if x <= 0
-    ```
-    alpha(α) has default value as 1.0.
-    """
-    def forward(self, inputs:np.ndarray, alpha=1.0):
-        """
-        ```self.output``` gets values that are output of the ELU function.
-        """
-        self.output = np.where(input>0, inputs, alpha*(np.exp(inputs) - 1))
-    def backward(self, dvalues):
-        """
-        Calculate the derivative of the loss with respect to the inputs.
-        """
-        self.dinputs = dvalues.copy()
-        self.dinputs[self.inputs <= 0] *= self.alpha * np.exp(self.inputs[self.inputs <= 0])
-
-class sigmoid:
-    """
-    Sigmoid activation function gives outputs as:
-    ```
-        sigmoid(x) = 1 / (1 + exp(-x))
-    ```
-    """
-    def forward(self, inputs):
-        """
-        ``self.output`` gets values that are output of the Sigmoid function.
-        """
-        self.output = 1 / (1 + np.exp(-1*inputs))
-    def backward(self, dvalues):
-        """
-        Calculate the derivative of the loss with respect to the inputs.
-        """
-        self.dinputs = dvalues * (self.output * (1 - self.output))
-
 
 # SGD optimizer
-class optimizer_SGD:
+class Optimizer_SGD:
 
     # Initialize optimizer - set settings,
     # learning rate of 1. is default for this optimizer
@@ -240,7 +154,7 @@ class optimizer_SGD:
 
 
 # Adagrad optimizer
-class optimizer_Adagrad:
+class Optimizer_Adagrad:
 
     # Initialize optimizer - set settings
     def __init__(self, learning_rate=1., decay=0., epsilon=1e-7):
@@ -284,7 +198,7 @@ class optimizer_Adagrad:
 
 
 # RMSprop optimizer
-class optimizer_RMSprop:
+class Optimizer_RMSprop:
 
     # Initialize optimizer - set settings
     def __init__(self, learning_rate=0.001, decay=0., epsilon=1e-7,
@@ -333,7 +247,7 @@ class optimizer_RMSprop:
 
 
 # Adam optimizer
-class optimizer_adam:
+class Optimizer_Adam:
 
     # Initialize optimizer - set settings
     def __init__(self, learning_rate=0.001, decay=0., epsilon=1e-7,
@@ -423,7 +337,7 @@ class Loss:
 
 
 # Cross-entropy loss
-class loss_categoricalCrossentropy(Loss):
+class Loss_CategoricalCrossentropy(Loss):
 
     # Forward pass
     def forward(self, y_pred, y_true):
@@ -475,12 +389,12 @@ class loss_categoricalCrossentropy(Loss):
 
 # Softmax classifier - combined Softmax activation
 # and cross-entropy loss for faster backward step
-class activation_softmax_loss_categoricalCrossentropy():
+class Activation_Softmax_Loss_CategoricalCrossentropy():
 
     # Creates activation and loss function objects
     def __init__(self):
-        self.activation = softmax()
-        self.loss = loss_categoricalCrossentropy()
+        self.activation = Activation_Softmax()
+        self.loss = Loss_CategoricalCrossentropy()
 
     # Forward pass
     def forward(self, inputs, y_true):
@@ -508,3 +422,65 @@ class activation_softmax_loss_categoricalCrossentropy():
         self.dinputs[range(samples), y_true] -= 1
         # Normalize gradient
         self.dinputs = self.dinputs / samples
+
+
+# Create dataset
+X, y = spiral_data(samples=100, classes=3)
+
+# Create Dense layer with 2 input features and 64 output values
+dense1 = Layer_Dense(2, 64)
+
+# Create ReLU activation (to be used with Dense layer):
+activation1 = Activation_ReLU()
+
+# Create second Dense layer with 64 input features (as we take output
+# of previous layer here) and 3 output values (output values)
+dense2 = Layer_Dense(64, 3)
+# Create Softmax classifier's combined loss and activation
+loss_activation = Activation_Softmax_Loss_CategoricalCrossentropy()
+
+# Create optimizer
+optimizer = Optimizer_Adam(learning_rate=0.1, decay=1e-7)
+
+# Train in loop
+for epoch in range(10001):
+
+    # Perform a forward pass of our training data through this layer
+    dense1.forward(X)
+
+    # Perform a forward pass through activation function
+    # takes the output of first dense layer here
+    activation1.forward(dense1.output)
+
+    # Perform a forward pass through second Dense layer
+    # takes outputs of activation function of first layer as inputs
+    dense2.forward(activation1.output)
+
+    # Perform a forward pass through the activation/loss function
+    # takes the output of second dense layer here and returns loss
+    loss = loss_activation.forward(dense2.output, y)
+
+    # Calculate accuracy from output of activation2 and targets
+    # calculate values along first axis
+    predictions = np.argmax(loss_activation.output, axis=1)
+    if len(y.shape) == 2:
+        y = np.argmax(y, axis=1)
+    accuracy = np.mean(predictions==y)
+
+    if not epoch % 100:
+        print(f'epoch: {epoch}, ' +
+              f'acc: {accuracy:.3f}, ' +
+              f'loss: {loss:.3f}, ' +
+              f'lr: {optimizer.current_learning_rate}')
+
+    # Backward pass
+    loss_activation.backward(loss_activation.output, y)
+    dense2.backward(loss_activation.dinputs)
+    activation1.backward(dense2.dinputs)
+    dense1.backward(activation1.dinputs)
+
+    # Update weights and biases
+    optimizer.pre_update_params()
+    optimizer.update_params(dense1)
+    optimizer.update_params(dense2)
+    optimizer.post_update_params()

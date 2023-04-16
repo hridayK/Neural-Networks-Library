@@ -32,11 +32,9 @@ class AdamOptimizer:
         return update
 
 class SGD:
-    def __init__(self, learning_rate):
+    def __init__(self, learning_rate=1.0):
         self.learning_rate = learning_rate
     
-    def update(self, params, gradients):
-        for param, grad in zip(params, gradients):
-            param -= self.learning_rate * grad
-            #what is happening here? Update the model parameters in the direction of the negative gradient using the learning rate hyperparameter.
-
+    def update_params(self, layer):
+        layer.weights += -self.learning_rate * layer.dweights
+        layer.biases += -self.learning_rate * layer.dbiases

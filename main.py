@@ -1,104 +1,66 @@
-from nnl import bundle as nn
-from nnl import optimizers
 import numpy as np
+import nnfs
 from nnfs.datasets import spiral_data
+from nnl import bundle as nn
 
-# X, y = spiral_data(samples=100, classes=3)
-
-# layer1 = nn.dense(2,3)
-# activation1 = nn.relu()
-# layer2 = nn.dense(3,3)
-# loss_activation = nn.activation_softmax_loss_activation_category()
-
-# layer1.forward(X)
-# activation1.forward(layer1.output)
-# layer2.forward(activation1.output)
-# loss = loss_activation.forward(layer2.output,y)
-
-# print("weights shape after forward: ", layer1.weights.shape)
-# print("bias shape after forward: ", layer1.biases.shape)
-
-# loss_function = nn.categorical_cross_entropy()
-
-# print("Loss: ", loss)
-
-# loss_activation.backward(loss_activation.output, y)
-# layer2.backward(loss_activation.dinputs)
-# activation1.backward(layer2.dinputs)
-# layer1.backward(activation1.dinputs)
-
-# print("weights shape after backward: ", layer1.dweights.shape)
-# print("bias shape after backward: ", layer1.dbiases.shape)
-
-# layer1.dweights = layer1.dweights.T
-# layer1.dbiases = layer1.dbiases.T
-# layer2.dweights = layer2.dweights.T
-# layer2.dbiases = layer2.dbiases.T
-
-# print("weights shape after transpose: ", layer1.dweights.shape)
-# print("bias shape after transpose: ", layer1.dbiases.shape)
-# print("weights shape after transpose: ", layer2.dweights.shape)
-# print("bias shape after transpose: ", layer2.dbiases.shape)
-
-
-
-# print(f"\nlayer 1:\n\ndweights = {layer1.dweights}\n\ndbiases = {layer1.dbiases}\n")
-# print(f"\nlayer 2:\n\ndweights = {layer2.dweights}\n\ndbiases = {layer2.dbiases}")
-
-# optimizer = optimizers.AdamOptimizer(learning_rate=0.01, beta1=0.9, beta2=0.999, epsilon=1e-8)
-
-# print("weights shape: ", layer2.dweights.shape)
-
-# layer1.dweights += optimizer.optimize(layer1.dweights)
-# layer1.dbiases += optimizer.optimize(layer1.dbiases)
-# layer2.dweights += optimizer.optimize(layer2.dweights)
-# layer2.dbiases += optimizer.optimize(layer2.dbiases)
-
-# print(f"\nlayer 1:\n\ndweights = {layer1.dweights}\n\ndbiases = {layer1.dbiases}\n")
-# print(f"\nlayer 2:\n\ndweights = {layer2.dweights}\n\ndbiases = {layer2.dbiases}")
-
+nnfs.init()
+# Create dataset
 X, y = spiral_data(samples=100, classes=3)
 
-layer1 = nn.dense(2, 3)
+# Create Dense layer with 2 input features and 64 output values
+dense1 = nn.layer_dense(2, 64)
+
+# Create ReLU activation (to be used with Dense layer):
 activation1 = nn.relu()
-layer2 = nn.dense(3, 3)
-loss_activation = nn.activation_softmax_loss_activation_category()
 
-optimizer = optimizers.AdamOptimizer(learning_rate=0.01, beta1=0.9, beta2=0.999, epsilon=1e-8)
+# Create second Dense layer with 64 input features (as we take output
+# of previous layer here) and 3 output values (output values)
+dense2 = nn.layer_dense(64, 3)
+# Create Softmax classifier's combined loss and activation
+loss_activation = nn.activation_softmax_loss_categoricalCrossentropy()
 
-# Train model
-for epoch in range(1000):
-    # Forward pass
-    layer1.forward(X)
-    activation1.forward(layer1.output)
-    layer2.forward(activation1.output)
-    loss = loss_activation.forward(layer2.output, y)
-    
-    # Print loss every 100 epochs
-    if epoch % 100 == 0:
-        print(f"Epoch {epoch}: Loss = {loss:.4f}")
-    
+# Create optimizer
+optimizer = nn.optimizer_adam(learning_rate=0.1, decay=1e-7)
+
+# Train in loop
+for epoch in range(10001):
+
+    # Perform a forward pass of our training data through this layer
+    dense1.forward(X)
+
+    # Perform a forward pass through activation function
+    # takes the output of first dense layer here
+    activation1.forward(dense1.output)
+
+    # Perform a forward pass through second Dense layer
+    # takes outputs of activation function of first layer as inputs
+    dense2.forward(activation1.output)
+
+    # Perform a forward pass through the activation/loss function
+    # takes the output of second dense layer here and returns loss
+    loss = loss_activation.forward(dense2.output, y)
+
+    # Calculate accuracy from output of activation2 and targets
+    # calculate values along first axis
+    predictions = np.argmax(loss_activation.output, axis=1)
+    if len(y.shape) == 2:
+        y = np.argmax(y, axis=1)
+    accuracy = np.mean(predictions==y)
+
+    if not epoch % 100:
+        print(f'epoch: {epoch}, ' +
+              f'acc: {accuracy:.3f}, ' +
+              f'loss: {loss:.3f}, ' +
+              f'lr: {optimizer.current_learning_rate}')
+
     # Backward pass
     loss_activation.backward(loss_activation.output, y)
-    layer2.backward(loss_activation.dinputs)
-    activation1.backward(layer2.dinputs)
-    layer1.backward(activation1.dinputs)
-    
-    # Updating model parameters
-    layer1.weights += optimizer.optimize(layer1.dweights)
-    layer1.biases += optimizer.optimize(layer1.dbiases)
-    layer2.weights += optimizer.optimize(layer2.dweights)
-    layer2.biases += optimizer.optimize(layer2.dbiases)
+    dense2.backward(loss_activation.dinputs)
+    activation1.backward(dense2.dinputs)
+    dense1.backward(activation1.dinputs)
 
-# Evaluate model
-layer1.forward(X)
-activation1.forward(layer1.output)
-layer2.forward(activation1.output)
-predictions = np.argmax(layer2.output, axis=1)
-accuracy = np.mean(predictions == y)
-
-print(f"Accuracy: {accuracy:.4f}")
-
-
-
-
+    # Update weights and biases
+    optimizer.pre_update_params()
+    optimizer.update_params(dense1)
+    optimizer.update_params(dense2)
+    optimizer.post_update_params()
