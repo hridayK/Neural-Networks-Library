@@ -15,7 +15,7 @@ class AdamOptimizer:
             self.m = np.zeros(gradient.shape)
             self.v = np.zeros(gradient.shape)
         
-        print("Gradient shape: ", gradient.shape)
+        #print("Gradient shape: ", gradient.shape)
         
         self.t += 1
         
@@ -27,7 +27,7 @@ class AdamOptimizer:
         
         update = -self.learning_rate * bias_corrected_m / (np.sqrt(bias_corrected_v) + self.epsilon)
         
-        print("update shape: ", update.shape)
+        #print("update shape: ", update.shape)
         
         return update
 
