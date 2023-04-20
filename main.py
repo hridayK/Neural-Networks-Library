@@ -20,7 +20,7 @@ dense2 = nn.layer_dense(64, 3)
 loss_activation = nn.activation_softmax_loss_categoricalCrossentropy()
 
 # Create optimizer
-optimizer = nn.optimizer_adam(learning_rate=0.1, decay=1e-7)
+optimizer = nn.optimizer_sgd(learning_rate=1.0, decay=1e-3, momentum=0.9)
 
 # Train in loop
 for epoch in range(10001):
@@ -50,8 +50,7 @@ for epoch in range(10001):
     if not epoch % 100:
         print(f'epoch: {epoch}, ' +
               f'acc: {accuracy:.3f}, ' +
-              f'loss: {loss:.3f}, ' +
-              f'lr: {optimizer.current_learning_rate}')
+              f'loss: {loss:.3f}')
 
     # Backward pass
     loss_activation.backward(loss_activation.output, y)
